@@ -19,6 +19,14 @@ class Board extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+
     public function tasks()
     {
         return $this->hasMany(Task::class);

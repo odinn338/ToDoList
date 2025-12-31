@@ -21,8 +21,20 @@ class BoardController extends Controller
      */
     public function index(Request $request)
     {
-        return $request->user()
-            ->boards()
+        // return $request->user()
+        //     ->boards()
+        //     ->latest()
+        //     ->get();
+        $user = $request->user();
+
+        return Board::query()
+            ->where('user_id', $user->id)
+            ->orWhereHas('users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            })
+            ->with(['users' => function ($q) {
+                $q->select('users.id', 'name')->withPivot('role');
+            }])
             ->latest()
             ->get();
     }
@@ -32,9 +44,20 @@ class BoardController extends Controller
      */
     public function store(StoreBoardRequest $request)
     {
-        return $request->user()
+        // return $request->user()
+        //     ->boards()
+        //     ->create($request->validated());
+
+        $board = $request->user()
             ->boards()
             ->create($request->validated());
+
+        $board->users()->attach(
+            $request->user()->id,
+            ['role' => 'owner']
+        );
+
+        return $board;
     }
 
     /**

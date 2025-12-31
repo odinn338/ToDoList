@@ -37,7 +37,10 @@ class BoardPolicy
      */
     public function update(User $user, Board $board): bool
     {
-        return $board->user_id === $user->id;
+        return $board->users()
+            ->where('user_id', $user->id)
+            ->whereIn('role', ['owner', 'editor'])
+            ->exists();
     }
 
     /**
@@ -45,7 +48,10 @@ class BoardPolicy
      */
     public function delete(User $user, Board $board): bool
     {
-        return $board->user_id === $user->id;
+        return $board->users()
+            ->where('user_id', $user->id)
+            ->where('role', 'owner')
+            ->exists();
     }
 
     /**
